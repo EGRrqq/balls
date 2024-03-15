@@ -10,5 +10,8 @@ function init() {
   if (!ctx) return;
 
   const ball = new Ball(ctx);
-  ball.draw();
+  ball.draw({
+    posX: 100,
+    posY: 75,
+  });
 }
