@@ -1,27 +1,15 @@
+import { Ball } from './controllers/Ball';
 import './style.css'
 
-const board = document.getElementById("board") as HTMLCanvasElement;
-const ctx = board?.getContext("2d");
+window.addEventListener("load", init, { once: true });
 
-class Ball {
-  #context: CanvasRenderingContext2D;
+function init() {
+  const board = document.getElementById("board") as HTMLCanvasElement;
+  const ctx = board.getContext("2d");
 
-  constructor(ctx: CanvasRenderingContext2D) {
-    this.#context = ctx;
-  }
+  if (!ctx) return;
 
-  draw() {
-    this.#ctx.beginPath()
-    this.#ctx.arc(100, 75, 50, 0, 2 * Math.PI);
-    this.#ctx.fill();
-    this.#ctx.closePath()
-  }
 
-  get #ctx() {
-    return this.#context;
-  }
+  const ball = new Ball(ctx);
+  ball.draw();
 }
-
-const ball = new Ball(ctx);
-ball.draw();
-
