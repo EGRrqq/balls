@@ -6,6 +6,10 @@
   margin: 0;
 }
 
+body {
+  display: grid;
+}
+
 canvas {
   border: solid;
 }
