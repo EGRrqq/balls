@@ -1,84 +1,39 @@
 import "./style.css";
 
+import {
+  BallController,
+  BoardController,
+  MouseController,
+  VectorController,
+} from "./controllers";
+
 const board = document.getElementById("board") as HTMLCanvasElement;
-const ctx = board!.getContext("2d");
-let raf: number;
+const boardController = new BoardController(board);
+const ctx = boardController.ctx;
 
-const ball = {
-  x: 100,
-  y: 100,
-  vx: 5,
-  vy: 1,
-  radius: 50,
-  color: "blue",
-  draw() {
-    ctx!.beginPath();
-    ctx!.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
-    ctx!.closePath();
-    ctx!.fillStyle = this.color;
-    ctx!.fill();
-  },
-};
+if (ctx) {
+  const mouseController = new MouseController();
+  const vectorController = new VectorController();
+  const ballController = new BallController(ctx);
 
-function clear() {
-  ctx!.clearRect(0, 0, board.width, board.height);
-}
+  ballController.draw();
+  board.addEventListener("click", (e) => draw(e));
+  board.addEventListener("mouseover", (e) => draw(e));
 
-function draw(e: MouseEvent) {
-  clear();
-  ball.draw();
+  function draw(e: MouseEvent) {
+    boardController.clearBoard();
+    ballController.draw();
 
-  const mouseX = e.clientX - board.getBoundingClientRect().left;
-  const mouseY = e.clientY - board.getBoundingClientRect().top;
+    const normDirVec = vectorController.normDirVec(
+      mouseController.getPos(e, board),
+      ballController.getPos()
+    );
 
-  // Calculate the direction vector from circle center to mouse
-  const dirX = mouseX - ball.x;
-  const dirY = mouseY - ball.y;
-  const distance = Math.sqrt(dirX * dirX + dirY * dirY);
+    ballController.applyImpulse(0.7, normDirVec);
+    ballController.updatePos();
+    ballController.dampVelocity(0.99);
+    ballController.detectCollision(board);
 
-  // Normalize the direction vector
-  const normalizedDirX = dirX / distance;
-  const normalizedDirY = dirY / distance;
-
-  // Apply an impulse
-  const impulseStrength = 0.7;
-  ball.vx += normalizedDirX * impulseStrength;
-  ball.vy += normalizedDirY * impulseStrength;
-
-  ball.x += ball.vx;
-  ball.y += ball.vy;
-  ball.vx *= 0.99;
-  ball.vy *= 0.99;
-
-  // Detect collision
-  if (
-    ball.y + ball.vy > board.height - ball.radius ||
-    ball.y + ball.vy < ball.radius
-  ) {
-    ball.vy = -ball.vy;
+    requestAnimationFrame(() => draw(e));
   }
-  if (
-    ball.x + ball.vx > board.width - ball.radius ||
-    ball.x + ball.vx < ball.radius
-  ) {
-    ball.vx = -ball.vx;
-  }
-
-  console.log({ x: ball.x, y: ball.y });
-
-  raf = window.requestAnimationFrame(() => draw(e));
 }
-
-board.addEventListener("click", (e) => {
-  raf = window.requestAnimationFrame(() => draw(e));
-});
-
-board.addEventListener("mouseover", (e) => {
-  raf = window.requestAnimationFrame(() => draw(e));
-});
-
-board.addEventListener("mouseout", () => {
-  window.cancelAnimationFrame(raf);
-});
-
-ball.draw();
