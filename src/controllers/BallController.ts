@@ -12,8 +12,8 @@ interface IBallController {
 interface IBallSettings {
   x: number;
   y: number;
-  dx: number;
-  dy: number;
+  vx: number;
+  vy: number;
   radius: number;
 }
 
@@ -28,16 +28,28 @@ interface IRatio {
 
 export class BallController implements IBallController {
   #context: CanvasRenderingContext2D;
+  #flag = false;
   #settings: IBallSettings = {
-    x: 100,
-    y: 75,
-    dx: 5,
-    dy: 2,
+    x: 200,
+    y: 175,
+    vx: 0,
+    vy: 0,
     radius: 50,
   };
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.#context = ctx;
+  }
+
+  onTouch(distance: number, cb: () => void) {
+    if (distance <= this.settings.radius && !this.#flag) {
+      this.#flag = true;
+      cb();
+    }
+
+    if (distance > this.settings.radius && this.#flag) {
+      this.#flag = false;
+    }
   }
 
   draw(settings: IBallSettings = this.#settings) {
@@ -48,14 +60,14 @@ export class BallController implements IBallController {
   }
 
   applyImpulse(impulseStrength: number, normDirVec: IBaseVec): void {
-    this.settings.dx += normDirVec.x * impulseStrength;
-    this.settings.dy += normDirVec.y * impulseStrength;
+    this.settings.vx += normDirVec.x * impulseStrength;
+    this.settings.vy += normDirVec.y * impulseStrength;
   }
 
   // Update circle pos based on velocity
   updatePos() {
-    this.settings.x += this.settings.dx;
-    this.settings.y += this.settings.dy;
+    this.settings.x += this.settings.vx;
+    this.settings.y += this.settings.vy;
   }
 
   getPos(): IBaseVec {
@@ -67,24 +79,24 @@ export class BallController implements IBallController {
 
   detectCollision(board: IRatio) {
     if (
-      this.settings.y + this.settings.dy >
+      this.settings.y + this.settings.vy >
         board.height - this.settings.radius ||
-      this.settings.y + this.settings.dy < this.settings.radius
+      this.settings.y + this.settings.vy < this.settings.radius
     ) {
-      this.settings.dy = -this.settings.dy;
+      this.settings.vy = -this.settings.vy;
     }
     if (
-      this.settings.x + this.settings.dx > board.width - this.settings.radius ||
-      this.settings.x + this.settings.dx < this.settings.radius
+      this.settings.x + this.settings.vx > board.width - this.settings.radius ||
+      this.settings.x + this.settings.vx < this.settings.radius
     ) {
-      this.settings.dx = -this.settings.dx;
+      this.settings.vx = -this.settings.vx;
     }
   }
 
   // Damping (reduce velocity over time)
   dampVelocity(r: number) {
-    this.settings.dx *= r;
-    this.settings.dy *= r;
+    this.settings.vx *= r;
+    this.settings.vy *= r;
   }
 
   get settings() {

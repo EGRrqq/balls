@@ -16,24 +16,30 @@ if (ctx) {
   const vectorController = new VectorController();
   const ballController = new BallController(ctx);
 
-  ballController.draw();
-  board.addEventListener("click", (e) => draw(e));
-  board.addEventListener("mouseover", (e) => draw(e));
+  window.addEventListener("load", draw, { once: true });
+  board.addEventListener("mousemove", (e) => onMove(e));
 
-  function draw(e: MouseEvent) {
-    boardController.clearBoard();
-    ballController.draw();
-
-    const normDirVec = vectorController.normDirVec(
+  function onMove(e: MouseEvent) {
+    const dirVec = vectorController.dirVec(
       mouseController.getPos(e, board),
       ballController.getPos()
     );
+    const distance = vectorController.distance(dirVec);
+    const normDirVec = vectorController.normalizeDirVec(dirVec, distance);
 
-    ballController.applyImpulse(0.7, normDirVec);
+    ballController.onTouch(distance, () => {
+      ballController.applyImpulse(-6, normDirVec);
+    });
+  }
+
+  function draw() {
+    boardController.clearBoard();
+    ballController.draw();
+
     ballController.updatePos();
     ballController.dampVelocity(0.99);
     ballController.detectCollision(board);
 
-    requestAnimationFrame(() => draw(e));
+    requestAnimationFrame(draw);
   }
 }
