@@ -32,16 +32,19 @@ interface IRatio {
 export class BallController implements IBallController {
   #context: CanvasRenderingContext2D;
   #flag = false;
-  #settings: IBallSettings = {
-    x: Math.floor(Math.random() * 700),
-    y: Math.floor(Math.random() * 500),
-    vx: 0,
-    vy: 0,
-    radius: 25,
-  };
+  #settings: IBallSettings;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.#context = ctx;
+
+    const radius = 25;
+    this.#settings = {
+      x: Math.random() * (ctx.canvas.width - 2 * radius) + radius,
+      y: Math.random() * (ctx.canvas.height - 2 * radius) + radius,
+      vx: 0,
+      vy: 0,
+      radius: radius,
+    };
   }
 
   onTouch(distance: number, cb: () => void) {
