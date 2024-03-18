@@ -1,9 +1,11 @@
-interface IBoardSettings {
+export interface IBoardController {
   board: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D | null;
+
+  clearBoard(): void;
 }
 
-export class BoardController implements IBoardSettings {
+export class BoardController implements IBoardController {
   #boardElem: HTMLCanvasElement;
 
   constructor(boardEl: HTMLCanvasElement) {
