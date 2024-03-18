@@ -30,8 +30,8 @@ export class BallController implements IBallController {
   #context: CanvasRenderingContext2D;
   #flag = false;
   #settings: IBallSettings = {
-    x: 200,
-    y: 175,
+    x: Math.floor(Math.random() * 700),
+    y: Math.floor(Math.random() * 500),
     vx: 0,
     vy: 0,
     radius: 50,
