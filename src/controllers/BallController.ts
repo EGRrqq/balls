@@ -1,3 +1,5 @@
+import { IData } from "../data";
+
 interface IBallController {
   settings: IBallSettings;
 
@@ -6,7 +8,8 @@ interface IBallController {
   updatePos(): void;
   getPos(): IBaseVec;
   dampVelocity(r: number): void;
-  detectCollision(board: IRatio): void;
+  edgeCollision(board: IRatio): void;
+  ballsCollision(shapes: IData["shapeControllers"]): void;
 }
 
 interface IBallSettings {
@@ -34,7 +37,7 @@ export class BallController implements IBallController {
     y: Math.floor(Math.random() * 500),
     vx: 0,
     vy: 0,
-    radius: 50,
+    radius: 25,
   };
 
   constructor(ctx: CanvasRenderingContext2D) {
@@ -77,7 +80,7 @@ export class BallController implements IBallController {
     };
   }
 
-  detectCollision(board: IRatio) {
+  edgeCollision(board: IRatio) {
     if (
       this.settings.y + this.settings.vy >
         board.height - this.settings.radius ||
@@ -90,6 +93,29 @@ export class BallController implements IBallController {
       this.settings.x + this.settings.vx < this.settings.radius
     ) {
       this.settings.vx = -this.settings.vx;
+    }
+  }
+
+  ballsCollision(shapes: IData["shapeControllers"]) {
+    for (const otherBall of shapes) {
+      if (otherBall.ball !== this) {
+        const dirVec = otherBall.vector.dirVec(
+          this.getPos(),
+          otherBall.ball.getPos()
+        );
+        const distance = otherBall.vector.distance(dirVec);
+
+        if (distance < this.settings.radius + otherBall.ball.settings.radius) {
+          [this.settings.vx, otherBall.ball.settings.vx] = [
+            otherBall.ball.settings.vx,
+            this.settings.vx,
+          ];
+          [this.settings.vy, otherBall.ball.settings.vy] = [
+            otherBall.ball.settings.vy,
+            this.settings.vy,
+          ];
+        }
+      }
     }
   }
 

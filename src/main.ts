@@ -34,7 +34,8 @@ if (data) {
 
       c.ball.updatePos();
       c.ball.dampVelocity(0.99);
-      c.ball.detectCollision(data.boardController.board);
+      c.ball.edgeCollision(data.boardController.board);
+      c.ball.ballsCollision(data.shapeControllers);
     });
 
     requestAnimationFrame(() => draw(data));
